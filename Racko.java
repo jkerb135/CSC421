@@ -34,8 +34,7 @@ public class Racko extends JApplet{
         //Get Params
         players = getParameter("players");
 
-        NewTestGui GUI = new NewTestGui(players.split(","));
-        mainContentPane = GUI;
+        mainContentPane = new NewTestGui(players.split(","));
         setContentPane(mainContentPane);
 
         String args[] = {"/d"};

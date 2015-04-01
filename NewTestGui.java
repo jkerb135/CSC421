@@ -8,12 +8,9 @@ public class NewTestGui extends JPanel implements ActionListener
 {
     public static boolean
             debug = false,
-            show_rack = false,
             end_turns = false,
             load_deck = false,
-            card_order = false,
-            isDrawPileClicked = false,
-            isDiscardPileClicked = false;
+            card_order = false;
 
     private int winningScore = 500;
     private int maxScore = 0;
@@ -47,8 +44,8 @@ public class NewTestGui extends JPanel implements ActionListener
         setBounds(0, 0, 800, 600);
         initDeck(args);
         addPlayers();
-        addDeckPanel();
         addSidePanel();
+        addDeckPanel();
     }
 
     public void initDeck(String[] args)
@@ -61,10 +58,6 @@ public class NewTestGui extends JPanel implements ActionListener
                 players.addPlayer(new EasyComputer(args[i]));
             }
         }
-
-        players.reset();
-        theDeck = new Deck(this.players.getPlayers().size());
-        theDeck.dealDeck(this.players);
     }
 
     public void addDeckPanel()
@@ -72,22 +65,6 @@ public class NewTestGui extends JPanel implements ActionListener
         deckPanel.setBackground(Color.DARK_GRAY);
         deckPanel.setBounds(0, 0, 550, 200);
 
-        drawPileBtn = theDeck.getTopDraw();
-        drawPileBtn.setCardDirection(false);
-        drawPileBtn.setBounds(90, 55, 180, 90);
-        drawPileBtn.setActionCommand("Deck Clicked");
-        drawPileBtn.addActionListener(this);
-        drawPileBtn.addMouseListener(drawML);
-
-        discardPileBtn = theDeck.getTopDisc();
-        Rectangle b = drawPileBtn.getBounds();
-        discardPileBtn.setBounds(b.x + (b.width + 10), b.y, 180, 90);
-        discardPileBtn.setActionCommand("Draw Clicked");
-        discardPileBtn.addActionListener(this);
-        discardPileBtn.addMouseListener(discML);
-
-        deckPanel.add(drawPileBtn);
-        deckPanel.add(discardPileBtn);
         add(deckPanel);
     }
 
@@ -153,6 +130,25 @@ public class NewTestGui extends JPanel implements ActionListener
         add(computerPanel);
     }
 
+    public void addDeck(){
+        drawPileBtn = theDeck.getTopDraw();
+        drawPileBtn.setCardDirection(false);
+        drawPileBtn.setBounds(90, 55, 180, 90);
+        drawPileBtn.setActionCommand("Deck Clicked");
+        drawPileBtn.addActionListener(this);
+        drawPileBtn.addMouseListener(drawML);
+
+        discardPileBtn = theDeck.getTopDisc();
+        Rectangle b = drawPileBtn.getBounds();
+        discardPileBtn.setBounds(b.x + (b.width + 10), b.y, 180, 90);
+        discardPileBtn.setActionCommand("Draw Clicked");
+        discardPileBtn.addActionListener(this);
+        discardPileBtn.addMouseListener(discML);
+
+        deckPanel.add(drawPileBtn);
+        deckPanel.add(discardPileBtn);
+    }
+
     public void updateDeck()
     {
         deckPanel.invalidate();
@@ -170,6 +166,8 @@ public class NewTestGui extends JPanel implements ActionListener
 
         drawPileBtn.repaint();
         discardPileBtn.repaint();
+
+        deckPanel.repaint();
     }
 
     public void updateSidePanel(int currentPlayerIdx)
@@ -196,21 +194,31 @@ public class NewTestGui extends JPanel implements ActionListener
 
     public void playGame()
     {
+        players.reset();
+        theDeck = new Deck(players.getPlayers().size());
+        theDeck.dealDeck(players);
+        addDeck();
+
         gameThread = new Thread()
         {
             public void run() {
-                while (maxScore < winningScore) {
+                do{
+                    if(isRoundDone){
+                        players.reset();
+                        theDeck = new Deck(players.getPlayers().size());
+                        theDeck.dealDeck(players);
+                        updateDeck();
+                    }
+
                     while (!isRoundDone) {
                         int i = 0;
                         int len = Players.getInstanceOf().getPlayers().size();
                         for (; i < len; i++) {
                             CardLayout cl = (CardLayout) computerPanel.getLayout();
 
-                            theDeck.printDeck();
-                            theDeck.printDiscard();
-
                             currentPlayer = players.getPlayer(i);
                             updateSidePanel(i);
+
                             if ((currentPlayer instanceof Computer)) {
                                 removeMouseListeners(drawPileBtn);
                                 removeMouseListeners(discardPileBtn);
@@ -236,11 +244,9 @@ public class NewTestGui extends JPanel implements ActionListener
                                 if (currentPlayer.the_rack.wasCardReplaced) {
                                     if (discardClicked) {
                                         Card c = theDeck.drawTopDiscard();
-                                        System.out.println(c.cardValue);
                                         theDeck.discard(c);
                                     } else {
                                         Card c = theDeck.drawTopCard();
-                                        System.out.println(c.cardValue);
                                         theDeck.discard(c);
                                     }
                                     turnTaken = true;
@@ -249,14 +255,18 @@ public class NewTestGui extends JPanel implements ActionListener
                                 }
                             }
 
-                            isRoundDone = currentPlayer.Rack().checkForRacko();
+                            if(currentPlayer.Rack().checkForRacko()){
+                                Score.scoreRound();
+                                maxScore = players.getHighestScore();
+                            }
 
                             resetFlags();
                             updateDeck();
                             repaint();
                         }
                     }
-                }
+
+                }while (maxScore < winningScore);
             }
         };
         gameThread.start();

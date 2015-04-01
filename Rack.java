@@ -14,8 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * The Rack class is where each Player will hold their own
@@ -189,11 +188,11 @@ public class Rack extends JLayeredPane{
         super.paintComponents(g);
     }
 
+
     class cardListener implements ActionListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 Card c = (Card) e.getSource();
-                System.out.println(c.cardValue + " Replaced with \t " + cardInUse);
                 if(cardInHand && cardInUse != null) {
                     cardInHand = false;
                     replaceCardInRack(c, cardInUse);
