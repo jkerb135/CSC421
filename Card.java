@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.MessageFormat;
 import java.util.Comparator;
 
 /**
@@ -20,6 +21,7 @@ public class Card extends JButton implements ActionListener{
     public Card(Integer value){
         super(value.toString());
         cardValue = value;
+        setText(Integer.toString(value));
         setSize(180, 90);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -52,6 +54,7 @@ public class Card extends JButton implements ActionListener{
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
+        cardValue = Integer.parseInt(getText());
         if(getIcon() == faceUpPath) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setPaint(Color.BLACK);

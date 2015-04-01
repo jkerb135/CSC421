@@ -1,16 +1,22 @@
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class NewTestGui extends JPanel implements ActionListener
 {
     public static boolean
             debug = false,
+            show_rack = false,
             end_turns = false,
             load_deck = false,
-            card_order = false;
+            card_order = false,
+            isDrawPileClicked = false,
+            isDiscardPileClicked = false;
+
+    private Timer drawTimer, discardTimer;
 
     private int winningScore = 500;
     private int maxScore = 0;
@@ -22,6 +28,8 @@ public class NewTestGui extends JPanel implements ActionListener
     private volatile boolean turnTaken = false;
     private boolean discardClicked;
     private boolean drawClicked;
+    private int alpha = 255;
+    private int increment = -5;
 
     private final MouseListener drawML = new drawMouseListener();
     private final MouseListener discML = new discardMouseListener();
@@ -43,9 +51,6 @@ public class NewTestGui extends JPanel implements ActionListener
         addMouseListener(new paneListener());
         setBounds(0, 0, 800, 600);
         initDeck(args);
-        addPlayers();
-        addSidePanel();
-        addDeckPanel();
     }
 
     public void initDeck(String[] args)
@@ -58,6 +63,10 @@ public class NewTestGui extends JPanel implements ActionListener
                 players.addPlayer(new EasyComputer(args[i]));
             }
         }
+
+        players.reset();
+        theDeck = new Deck(this.players.getPlayers().size());
+        theDeck.dealDeck(this.players);
     }
 
     public void addDeckPanel()
@@ -65,6 +74,22 @@ public class NewTestGui extends JPanel implements ActionListener
         deckPanel.setBackground(Color.DARK_GRAY);
         deckPanel.setBounds(0, 0, 550, 200);
 
+        drawPileBtn = theDeck.getTopDraw();
+        drawPileBtn.setCardDirection(false);
+        drawPileBtn.setBounds(90, 55, 180, 90);
+        drawPileBtn.setActionCommand("Deck Clicked");
+        drawPileBtn.addActionListener(this);
+        drawPileBtn.addMouseListener(drawML);
+
+        discardPileBtn = theDeck.getTopDisc();
+        Rectangle b = drawPileBtn.getBounds();
+        discardPileBtn.setBounds(b.x + (b.width + 10), b.y, 180, 90);
+        discardPileBtn.setActionCommand("Draw Clicked");
+        discardPileBtn.addActionListener(this);
+        discardPileBtn.addMouseListener(discML);
+
+        deckPanel.add(drawPileBtn);
+        deckPanel.add(discardPileBtn);
         add(deckPanel);
     }
 
@@ -130,25 +155,6 @@ public class NewTestGui extends JPanel implements ActionListener
         add(computerPanel);
     }
 
-    public void addDeck(){
-        drawPileBtn = theDeck.getTopDraw();
-        drawPileBtn.setCardDirection(false);
-        drawPileBtn.setBounds(90, 55, 180, 90);
-        drawPileBtn.setActionCommand("Deck Clicked");
-        drawPileBtn.addActionListener(this);
-        drawPileBtn.addMouseListener(drawML);
-
-        discardPileBtn = theDeck.getTopDisc();
-        Rectangle b = drawPileBtn.getBounds();
-        discardPileBtn.setBounds(b.x + (b.width + 10), b.y, 180, 90);
-        discardPileBtn.setActionCommand("Draw Clicked");
-        discardPileBtn.addActionListener(this);
-        discardPileBtn.addMouseListener(discML);
-
-        deckPanel.add(drawPileBtn);
-        deckPanel.add(discardPileBtn);
-    }
-
     public void updateDeck()
     {
         deckPanel.invalidate();
@@ -166,8 +172,6 @@ public class NewTestGui extends JPanel implements ActionListener
 
         drawPileBtn.repaint();
         discardPileBtn.repaint();
-
-        deckPanel.repaint();
     }
 
     public void updateSidePanel(int currentPlayerIdx)
@@ -192,24 +196,27 @@ public class NewTestGui extends JPanel implements ActionListener
         }
     }
 
+    public void updateScores(){
+        for (int i = 0, len = names.length; i < len; i++)
+        {
+            JLabel labelscr = scores[i];
+            labelscr.setText(Integer.toString(players.getPlayer(i)
+                    .getPlayerScore()));
+        }
+    }
+
     public void playGame()
     {
-        players.reset();
-        theDeck = new Deck(players.getPlayers().size());
-        theDeck.dealDeck(players);
-        addDeck();
-
         gameThread = new Thread()
         {
             public void run() {
-                do{
-                    if(isRoundDone){
-                        players.reset();
-                        theDeck = new Deck(players.getPlayers().size());
-                        theDeck.dealDeck(players);
-                        updateDeck();
-                    }
+                addPlayers();
+                addDeckPanel();
+                addSidePanel();
+                revalidate();
+                repaint();
 
+                while (maxScore < winningScore) {
                     while (!isRoundDone) {
                         int i = 0;
                         int len = Players.getInstanceOf().getPlayers().size();
@@ -220,9 +227,6 @@ public class NewTestGui extends JPanel implements ActionListener
                             updateSidePanel(i);
 
                             if ((currentPlayer instanceof Computer)) {
-                                removeMouseListeners(drawPileBtn);
-                                removeMouseListeners(discardPileBtn);
-
                                 boolean decision = ((Computer) currentPlayer).whichPile(theDeck);
                                 try {
                                     Thread.sleep(1500);
@@ -230,13 +234,12 @@ public class NewTestGui extends JPanel implements ActionListener
                                     e.printStackTrace();
                                 }
                                 if (decision) {
-                                    drawPileBtn.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
                                     drawPileBtn.doClick();
                                 } else {
                                     discardPileBtn.doClick();
                                 }
                                 ((Computer) currentPlayer).doGuiTurn(decision, theDeck);
-
+                                drawTimer.stop();
                                 cl.next(computerPanel);
                             }
 
@@ -244,9 +247,11 @@ public class NewTestGui extends JPanel implements ActionListener
                                 if (currentPlayer.the_rack.wasCardReplaced) {
                                     if (discardClicked) {
                                         Card c = theDeck.drawTopDiscard();
+                                        System.out.println(c.cardValue);
                                         theDeck.discard(c);
                                     } else {
                                         Card c = theDeck.drawTopCard();
+                                        System.out.println(c.cardValue);
                                         theDeck.discard(c);
                                     }
                                     turnTaken = true;
@@ -255,20 +260,28 @@ public class NewTestGui extends JPanel implements ActionListener
                                 }
                             }
 
-                            if(currentPlayer.Rack().checkForRacko()){
-                                Score.scoreRound();
-                                maxScore = players.getHighestScore();
-                            }
-
-                            resetFlags();
                             updateDeck();
                             repaint();
+
+                            isRoundDone = currentPlayer.Rack().checkForRacko();
+
+                            if(isRoundDone){
+                                currentPlayer.won_round = true;
+                                Score.scoreRound();
+                                //maxScore = players.getHighestScore();
+                                maxScore = 500;
+                                currentPlayer = players.getPlayer(0);
+                                updateScores();
+                                break;
+                            }
+                            resetFlags();
                         }
                     }
-
-                }while (maxScore < winningScore);
+                }
+                System.out.println("Game Over");
             }
         };
+        System.out.println("Starting");
         gameThread.start();
     }
 
@@ -290,12 +303,29 @@ public class NewTestGui extends JPanel implements ActionListener
 
     public void actionPerformed(ActionEvent e)
     {
-        Card c = (Card)e.getSource();
+        final Card c = (Card)e.getSource();
         if (e.getActionCommand() == "Deck Clicked")
         {
             drawClicked = true;
             c.setCardDirection(true);
             currentPlayer.Rack().setCardInUse(theDeck.getTopDraw());
+            drawTimer = new Timer(30, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    alpha += increment;
+                    if (alpha >= 255) {
+                        alpha = 255;
+                        increment = -increment;
+                    }
+                    if (alpha <= 0) {
+                        alpha = 0;
+                        increment = -increment;
+                    }
+                    c.setBorder(BorderFactory.createLineBorder(new Color(253,
+                            0, 0, alpha), 2));
+                }
+            });
+            drawTimer.start();
         }
         else if (e.getActionCommand() == "Draw Clicked")
         {
@@ -305,6 +335,7 @@ public class NewTestGui extends JPanel implements ActionListener
                 theDeck.discard(top);
                 turnTaken = true;
                 currentPlayer.Rack().setCardInUse(null);
+                drawTimer.stop();
             }
             else
             {
@@ -321,15 +352,15 @@ public class NewTestGui extends JPanel implements ActionListener
         public void mouseClicked(MouseEvent mouseEvent)
         {
             if(SwingUtilities.isRightMouseButton(mouseEvent)){
-                    Object[] options = {"OK"};
-                    JOptionPane.showOptionDialog(null,
+                Object[] options = {"OK"};
+                JOptionPane.showOptionDialog(null,
                         cheatMenu,
-                            "Cheats Menu",
-                            JOptionPane.PLAIN_MESSAGE,
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            options,
-                            options[0]);
+                        "Cheats Menu",
+                        JOptionPane.PLAIN_MESSAGE,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
                 mouseEvent.consume();
             }
         }
@@ -350,8 +381,8 @@ public class NewTestGui extends JPanel implements ActionListener
 
         public void mouseClicked(MouseEvent mouseEvent)
         {
-            Card c = (Card)mouseEvent.getSource();
-            c.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+            final Card c = (Card)mouseEvent.getSource();
+
             mouseEvent.consume();
         }
 
@@ -382,8 +413,7 @@ public class NewTestGui extends JPanel implements ActionListener
     {
         public void mouseClicked(MouseEvent mouseEvent)
         {
-            Card c = (Card)mouseEvent.getSource();
-            c.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+            final Card c = (Card)mouseEvent.getSource();
             mouseEvent.consume();
         }
 

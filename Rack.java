@@ -183,6 +183,7 @@ public class Rack extends JLayeredPane{
         System.out.println();
     }
 
+
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponents(g);
