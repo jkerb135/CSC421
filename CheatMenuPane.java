@@ -88,12 +88,21 @@ public class CheatMenuPane  extends JPanel{
                         order_Cheat.setEnabled(false);
                         Player player = Players.getInstanceOf().getPlayer(0);
                         ArrayList<Card> theRack = player.Rack().getRack();
+                        ArrayList<Card> sorted = new ArrayList<Card>(theRack);
 
-                        Collections.sort(theRack.subList(0, (Integer.parseInt(orderTo) - 1)), new CardCompare());
+                        Collections.sort(sorted, new CardCompare());
 
                         player.Rack().printRack();
+
+                       for(int i = 0; i < theRack.size(); i++){
+                           Card old = theRack.get(i);
+                           Card newCard = sorted.get(i);
+
+                           System.out.println("Replacing \t" + old + " with " + newCard);
+                           player.Rack().replaceCardInRack(old,newCard);
+                       }
+
                     }
-                    //for()
 
                 }
             }
