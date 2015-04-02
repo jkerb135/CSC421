@@ -65,7 +65,7 @@ public class CheatMenuPane  extends JPanel {
         JLabel orderRack = new JLabel("Order Rack");
         orderRack.setBounds(0, 110, 100, 25);
 
-        order_Cheat = new JToggleButton("OFF");
+        order_Cheat = new JToggleButton("CLICK");
         order_Cheat.setBounds(debug_Cheat.getX(), debug_Cheat.getHeight() + 10, 60,
                 30);
         order_Cheat.addChangeListener(new ChangeListener() {
@@ -83,8 +83,8 @@ public class CheatMenuPane  extends JPanel {
                             "Order To?");
 
                     if (orderTo != null) {
-                        order_Cheat.setText("ON");
-                        order_Cheat.setEnabled(false);
+                        order_Cheat.setText("CLICK");
+                        order_Cheat.setSelected(false);
                         Player player = Players.getInstanceOf().getPlayer(0);
                         ArrayList<Card> rack = player.Rack().getRack();
                         ArrayList<Integer> sorted = new ArrayList<Integer>();

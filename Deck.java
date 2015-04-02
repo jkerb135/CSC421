@@ -99,13 +99,9 @@ public class Deck{
      *                   card to it.
      */
     public void dealDeck(Players thePlayers) {
-        if (Game.load_deck) {
-            loadTheDeck();
-        }
         ArrayList<Card> tmp = new ArrayList<Card>(draw_pile);
         for (int i = 0; i < deal_count; i++) {
-            thePlayers.getPlayer(i % number_of_players).Rack()
-                    .addCardToRack(new Card(tmp.get(i).cardValue));
+            thePlayers.getPlayer(i % number_of_players).Rack().addCardToRack(new Card(tmp.get(i).cardValue));
             draw_pile.remove(tmp.get(i));
         }
 
@@ -114,13 +110,23 @@ public class Deck{
         Card firstCard = draw_pile.get(0);
         draw_pile.remove(firstCard);
         discard_pile.add(new Card(firstCard.cardValue));
+    }
 
-        if (Game.card_order) {
-            ArrayList<Card> playerRack = thePlayers.getPlayer(0)
-                    .Rack().getRack();
-            thePlayers.getPlayer(0).Rack().printRack();
-            SelectionSort.doSelectionSort(playerRack, Game.card_order_value);
+
+    public void reDeal(Players thePlayers){
+        ArrayList<Card> tmp = new ArrayList<Card>(draw_pile);
+        for (int i = 0; i < deal_count; i++) {
+            System.out.println("DEAL COUNT \t" + i + " of " + deal_count);
+            System.out.println("Player \t" + i % number_of_players);
+            thePlayers.getPlayer(i % number_of_players).Rack().updateCardsOnGui(new Card(tmp.get(i).cardValue));
+            draw_pile.remove(tmp.get(i));
         }
+
+        discard_pile = new ArrayList<Card>(draw_pile.size());
+
+        Card firstCard = draw_pile.get(0);
+        draw_pile.remove(firstCard);
+        discard_pile.add(new Card(firstCard.cardValue));
     }
 
 

@@ -26,6 +26,7 @@ import java.util.*;
  */
 public class Rack extends JLayeredPane{
     protected volatile boolean wasCardReplaced = false;
+    private int card_counter = 0;
     private boolean cardInHand = false;
     protected Card cardInUse, oldCard;
     private ArrayList<Card> theRack;
@@ -107,6 +108,14 @@ public class Rack extends JLayeredPane{
         newCard.setText(Integer.toString(v1));
 
         return oldCard;
+    }
+
+    public void updateCardsOnGui(Card newCard){
+        System.out.println("Card Counter is \t" + card_counter);
+        Card oldCard = theRack.get(card_counter);
+        oldCard.setText(newCard.getText());
+        oldCard.cardValue = newCard.cardValue;
+        card_counter++;
     }
 
     /**

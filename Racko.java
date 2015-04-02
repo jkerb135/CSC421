@@ -11,18 +11,18 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
  * Creates a new instance of the game and passes the Game object the command
  * line arguments.
- *
  * @author Josh Kerbaugh
  * @version 1.0
  * @since 2015-26-2
  */
-public class Racko extends JApplet implements ActionListener {
+public class Racko extends JApplet implements ActionListener{
     public static boolean
             debug = false,
             show_rack = false,
@@ -41,7 +41,7 @@ public class Racko extends JApplet implements ActionListener {
     private Deck theDeck;
     private boolean isRoundDone = false;
     private Thread gameThread;
-    private volatile boolean turnTaken = false;
+    private boolean turnTaken = false;
     private boolean discardClicked;
     private boolean drawClicked;
     private int alpha = 255;
@@ -62,7 +62,7 @@ public class Racko extends JApplet implements ActionListener {
     private JLabel[] scores;
     public static int rack_size = 10;
 
-    public void init() {
+    public void init(){
         setLayout(null);
         System.out.println("App Init");
 
@@ -75,21 +75,28 @@ public class Racko extends JApplet implements ActionListener {
         glassPane = new GlassPane();
         setGlassPane(glassPane);
 
-        String args[] = {"/d"};
-        setSize(800, 600);
+        addPlayers();
+        addDeckPanel();
+        addSidePanel();
+        revalidate();
+        repaint();
+
+        setSize(800,600);
 
     }
 
-    public void start() {
+    public void start(){
         System.out.println("App Start");
         playGame();
     }
 
-    public void initDeck(String[] args) {
-        for (int i = 0, len = args.length; i < len; i++) {
-            if (i == 0) {
+    public void initDeck(String[] args)
+    {
+        for(int i = 0, len = args.length; i < len; i++){
+            if(i == 0){
                 players.addPlayer(new HumanPlayer(args[i]));
-            } else {
+            }
+            else{
                 players.addPlayer(new EasyComputer(args[i]));
             }
         }
@@ -97,9 +104,11 @@ public class Racko extends JApplet implements ActionListener {
         players.reset();
         theDeck = new Deck(players.getPlayers().size());
         theDeck.dealDeck(players);
+        theDeck.printDeck();
     }
 
-    public void addDeckPanel() {
+    public void addDeckPanel()
+    {
         deckPanel.setBackground(Color.DARK_GRAY);
         deckPanel.setBounds(0, 0, 550, 200);
 
@@ -123,7 +132,8 @@ public class Racko extends JApplet implements ActionListener {
         add(deckPanel);
     }
 
-    public void addSidePanel() {
+    public void addSidePanel()
+    {
         sidePanel.setBounds(550, 0, 250, 200);
         sidePanel.setBackground(Color.DARK_GRAY);
 
@@ -131,17 +141,21 @@ public class Racko extends JApplet implements ActionListener {
         scores = new JLabel[names.length];
 
         int i = 0;
-        for (int len = players.getPlayers().size(); i < len; i++) {
+        for (int len = players.getPlayers().size(); i < len; i++)
+        {
             Player p = players.getPlayer(i);
             JLabel name = new JLabel(p.getPlayerName());
             JLabel score = new JLabel(Integer.toString(p.getPlayerScore()));
 
             name.setFont(new Font("Serif", 1, 20));
             score.setFont(new Font("Serif", 1, 20));
-            if (i == 0) {
+            if (i == 0)
+            {
                 name.setBounds(20, 20, 110, 25);
                 score.setBounds(name.getWidth() + name.getX(), 20, 110, 25);
-            } else {
+            }
+            else
+            {
                 Rectangle b = names[(i - 1)].getBounds();
 
                 name.setBounds(b.x, b.y + (b.height + 10), 110, 25);
@@ -156,15 +170,20 @@ public class Racko extends JApplet implements ActionListener {
         add(sidePanel);
     }
 
-    public void addPlayers() {
+    public void addPlayers()
+    {
         playerPanel.setBounds(0, 200, 400, 600);
         computerPanel.setBounds(400, 200, 400, 600);
-        for (Player p : players.getPlayers()) {
-            if ((p instanceof Computer)) {
+        for (Player p : players.getPlayers())
+        {
+            if ((p instanceof Computer))
+            {
                 p.setBackground(Color.DARK_GRAY);
                 p.Rack().showHideRack(false);
                 computerPanel.add(p, p.getPlayerName());
-            } else if ((p instanceof HumanPlayer)) {
+            }
+            else if ((p instanceof HumanPlayer))
+            {
                 p.setBounds(0, 0, 400, 600);
                 p.setBackground(Color.DARK_GRAY);
                 playerPanel.add(p);
@@ -175,7 +194,8 @@ public class Racko extends JApplet implements ActionListener {
         add(computerPanel);
     }
 
-    public void updateDeck() {
+    public void updateDeck()
+    {
         deckPanel.invalidate();
         discardPileBtn.invalidate();
 
@@ -193,16 +213,22 @@ public class Racko extends JApplet implements ActionListener {
         discardPileBtn.repaint();
     }
 
-    public void updateSidePanel(int currentPlayerIdx) {
+    public void updateSidePanel(int currentPlayerIdx)
+    {
         int i = 0;
-        for (int len = names.length; i < len; i++) {
+        for (int len = names.length; i < len; i++)
+        {
             JLabel label = names[i];
             JLabel labelscr = scores[i];
-            if (i == currentPlayerIdx) {
+            label.setText(label.getText().replace("\u27AD ", ""));
+            if (i == currentPlayerIdx)
+            {
                 label.setText("\u27AD " + label.getText());
-                label.setForeground(new Color(0, 204, 0));
-                labelscr.setForeground(new Color(0, 204, 0));
-            } else {
+                label.setForeground(new Color(0,204,0));
+                labelscr.setForeground(new Color(0,204,0));
+            }
+            else
+            {
                 label.setText(label.getText().replace("\u27AD ", ""));
                 label.setForeground(Color.WHITE);
                 labelscr.setForeground(Color.WHITE);
@@ -210,103 +236,146 @@ public class Racko extends JApplet implements ActionListener {
         }
     }
 
-    public void updateScores() {
-        for (int i = 0, len = names.length; i < len; i++) {
+    public void updateScores(){
+        for (int i = 0, len = names.length; i < len; i++)
+        {
             JLabel labelscr = scores[i];
             labelscr.setText(Integer.toString(players.getPlayer(i)
                     .getPlayerScore()));
         }
     }
 
-    public void playGame() {
-        gameThread = new Thread() {
+    public void updateAfterRound(){
+
+        glassPane.setBackground(Color.BLACK);
+        glassPane.setVisible(true);
+
+
+        /*deckPanel.invalidate();
+        playerPanel.invalidate();
+        computerPanel.invalidate();
+        invalidate();
+
+        deckPanel.removeAll();
+        playerPanel.removeAll();
+        computerPanel.removeAll();
+        remove(deckPanel);
+        remove(playerPanel);
+        remove(computerPanel);
+
+        theDeck.reset();
+        players.reset();
+
+        theDeck = new Deck(players.getPlayers().size());
+        theDeck.dealDeck(players);
+
+        revalidate();
+        repaint();
+
+        addPlayers();
+        addDeckPanel();
+
+        deckPanel.validate();
+        playerPanel.validate();
+        computerPanel.validate();
+        validate();
+
+        repaint();*/
+    }
+
+    public void playGame()
+    {
+        gameThread = new Thread()
+        {
             public void run() {
-                addPlayers();
-                addDeckPanel();
-                addSidePanel();
-                revalidate();
-                repaint();
-
                 while (maxScore < winningScore) {
-                    int i = 0;
-                    int len = Players.getInstanceOf().getPlayers().size();
-                    for (; i < len; i++) {
-                        glassPane.setVisible(false);
-                        CardLayout cl = (CardLayout) computerPanel.getLayout();
+                    while (!isRoundDone) {
+                        int i = 0;
+                        int len = Players.getInstanceOf().getPlayers().size();
+                        for (; i < len; i++) {
+                            glassPane.setVisible(false);
+                            CardLayout cl = (CardLayout) computerPanel.getLayout();
 
-                        currentPlayer = players.getPlayer(i);
-                        updateSidePanel(i);
+                            currentPlayer = players.getPlayer(i);
+                            updateSidePanel(i);
 
-                        if ((currentPlayer instanceof Computer)) {
-                            glassPane.setVisible(true);
-                            ((Computer) currentPlayer).doGuiTurn(drawPileBtn, discardPileBtn, theDeck);
-                            cl.next(computerPanel);
-                        }
-
-                        while (!turnTaken) {
-                            if (currentPlayer.the_rack.wasCardReplaced) {
-                                if (discardClicked) {
-                                    Card c = theDeck.drawTopDiscard();
-                                    theDeck.discard(c);
-                                } else {
-                                    Card c = theDeck.drawTopCard();
-                                    theDeck.discard(c);
-                                }
-                                turnTaken = true;
-                                currentPlayer.the_rack.wasCardReplaced = false;
-                                currentPlayer.the_rack.setCardInUse(null);
+                            if ((currentPlayer instanceof Computer)) {
+                                glassPane.setVisible(true);
+                                ((Computer) currentPlayer).doGuiTurn(drawPileBtn, discardPileBtn, theDeck);
+                                cl.next(computerPanel);
                             }
-                        }
-                        drawTimer.stop();
-                        updateDeck();
-                        repaint();
 
-                        isRoundDone = currentPlayer.Rack().checkForRacko();
-
-                        if (isRoundDone) {
-                            currentPlayer.won_round = true;
-                            Score.scoreRound();
-                            maxScore = players.getHighestScore();
-                            currentPlayer = players.getPlayer(0);
-                            updateScores();
-                            players.reset();
-                            theDeck.reset();
-                            theDeck.dealDeck(players);
+                            while (!turnTaken) {
+                                if (currentPlayer.the_rack.wasCardReplaced) {
+                                    if (discardClicked) {
+                                        Card c = theDeck.drawTopDiscard();
+                                        theDeck.discard(c);
+                                    } else {
+                                        Card c = theDeck.drawTopCard();
+                                        theDeck.discard(c);
+                                    }
+                                    turnTaken = true;
+                                    currentPlayer.the_rack.wasCardReplaced = false;
+                                    currentPlayer.the_rack.setCardInUse(null);
+                                }
+                            }
+                            drawTimer.stop();
                             updateDeck();
-                            break;
+                            repaint();
+
+                            isRoundDone = currentPlayer.Rack().checkForRacko();
+
+                            if(isRoundDone){
+                                currentPlayer.won_round = true;
+                                Score.scoreRound();
+                                maxScore = players.getHighestScore();
+                                currentPlayer = players.getPlayer(0);
+                                updateScores();
+                                resetFlags();
+                                updateAfterRound();
+                                break;
+                            }
+                            resetFlags();
                         }
-                        resetFlags();
                     }
                 }
-                System.out.println("Game Over");
             }
         };
-        System.out.println("Starting");
         gameThread.start();
     }
 
-    private void resetFlags() {
+    private void resetFlags()
+    {
         drawClicked = false;
         discardClicked = false;
         turnTaken = false;
+        isRoundDone = false;
+        currentPlayer = null;
     }
 
-    public void actionPerformed(ActionEvent e) {
-        final Card c = (Card) e.getSource();
-        if (e.getActionCommand() == "Deck Clicked") {
+    public void actionPerformed(ActionEvent e)
+    {
+        final Card c = (Card)e.getSource();
+        if (e.getActionCommand() == "Deck Clicked")
+        {
             drawClicked = true;
             c.setCardDirection(true);
             currentPlayer.Rack().setCardInUse(theDeck.getTopDraw());
             drawTimer = flashBorder(c);
             drawTimer.start();
-        } else if (e.getActionCommand() == "Draw Clicked") {
-            if (drawClicked) {
+        }
+        else if (e.getActionCommand() == "Draw Clicked")
+        {
+            if (drawClicked)
+            {
                 Card top = theDeck.drawTopCard();
                 theDeck.discard(top);
                 turnTaken = true;
                 currentPlayer.Rack().setCardInUse(null);
                 drawTimer.stop();
-            } else {
+            }
+            else
+            {
                 discardClicked = true;
                 drawPileBtn.setEnabled(false);
                 drawPileBtn.removeMouseListener(drawML);
@@ -317,7 +386,7 @@ public class Racko extends JApplet implements ActionListener {
         }
     }
 
-    private Timer flashBorder(final Card c) {
+    private Timer flashBorder(final Card c){
         Timer timer = new Timer(30, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -330,16 +399,18 @@ public class Racko extends JApplet implements ActionListener {
                     alpha = 0;
                     increment = -increment;
                 }
-                c.setBorder(BorderFactory.createLineBorder(new Color(0, 204, 0, alpha), 4));
+                c.setBorder(BorderFactory.createLineBorder(new Color(0,204,0, alpha), 4));
             }
         });
         return timer;
     }
 
-    class paneListener implements MouseListener {
+    class paneListener implements MouseListener
+    {
 
-        public void mouseClicked(MouseEvent mouseEvent) {
-            if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+        public void mouseClicked(MouseEvent mouseEvent)
+        {
+            if(SwingUtilities.isRightMouseButton(mouseEvent)){
                 Object[] options = {"OK"};
                 JOptionPane.showOptionDialog(null,
                         cheatMenu,
@@ -353,16 +424,22 @@ public class Racko extends JApplet implements ActionListener {
             }
         }
 
-        public void mousePressed(MouseEvent mouseEvent) {
-        }
+        public void mousePressed(MouseEvent mouseEvent) {}
 
-        public void mouseReleased(MouseEvent mouseEvent) {
-        }
+        public void mouseReleased(MouseEvent mouseEvent) {}
 
-        public void mouseEntered(MouseEvent mouseEvent) {
-        }
+        public void mouseEntered(MouseEvent mouseEvent) {}
 
-        public void mouseExited(MouseEvent mouseEvent) {
+        public void mouseExited(MouseEvent mouseEvent)
+        {
         }
+    }
+
+    @Override
+    public void paintComponents(Graphics g){
+        BufferedImage bufferedImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = bufferedImage.createGraphics();
+        Graphics2D g2dComponent = (Graphics2D) g;
+        g2dComponent.drawImage(bufferedImage, null, 0, 0);
     }
 }
