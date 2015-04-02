@@ -51,6 +51,9 @@ public abstract class Player extends JPanel{
     public void reset(){
         won_round = false;
         initializeRack();
+        if(this instanceof Computer){
+            the_rack.showHideRack(false);
+        }
         removeAll();
         repaint();
     }

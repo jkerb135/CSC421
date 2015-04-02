@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -33,7 +34,7 @@ public class Rack extends JLayeredPane{
     public static int rack_size;
     private static char[] rack_slots =
             {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
-
+    private boolean isRackShown = true;
     /**
      * Constructs the rack object to a specified size
      * @param size Size of the Rack
@@ -51,6 +52,9 @@ public class Rack extends JLayeredPane{
     }
 
     public void showHideRack(boolean shown){
+        StackTraceElement element = Thread.currentThread().getStackTrace()[4];
+        System.out.println(MessageFormat.format("({0}) : ", element));
+        isRackShown = shown;
         for(int i = 0, len = theRack.size(); i < len; i++){
             theRack.get(i).getCard().setCardDirection(shown);
             removeListeners(theRack.get(i));
@@ -73,8 +77,14 @@ public class Rack extends JLayeredPane{
         slotLbl.setBounds(185 + (theRack.size() * 20), 350 - (theRack.size() * 25), 150, 25);
         slotLbl.setForeground(Color.WHITE);
         card.setActionCommand("Rack");
-        card.addActionListener(new cardListener());
-        card.addMouseListener(new CardListeners());
+        if(!isRackShown){
+            card.setCardDirection(false);
+        }
+        else {
+            card.addActionListener(new cardListener());
+            card.addMouseListener(new CardListeners());
+        }
+
         add(card, new Integer(rack_size));
         add(slotLbl, new Integer(rack_size));
         theRack.add(card);
@@ -207,6 +217,7 @@ public class Rack extends JLayeredPane{
             @Override
             public void actionPerformed(ActionEvent e) {
                 Card c = (Card) e.getSource();
+                System.out.println(e.getActionCommand());
                 if(cardInHand && cardInUse != null) {
                     cardInHand = false;
                     replaceCardInRack(c, cardInUse);
