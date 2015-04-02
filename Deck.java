@@ -82,7 +82,7 @@ public class Deck{
      * of the deck will be set so the same pseudo random numbers are generated
      */
     private void shuffleDeck(){
-        if (Game.debug){
+        if (true){
             //Sets Seed in Debug so the same Deck is dealt
             Collections.shuffle(draw_pile, new Random(1000));
         }else {

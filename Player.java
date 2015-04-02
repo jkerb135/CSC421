@@ -41,7 +41,6 @@ public abstract class Player extends JPanel{
         player_name = playerName;
         won_round = false;
         initializeRack();
-
         setLayout(null);
 
     }
@@ -52,6 +51,8 @@ public abstract class Player extends JPanel{
     public void reset(){
         won_round = false;
         initializeRack();
+        removeAll();
+        repaint();
     }
 
     public void initializeRack(){
@@ -104,7 +105,7 @@ public abstract class Player extends JPanel{
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
-        the_rack.setBounds(25,0,360,400);
+        the_rack.setBounds(15,0,380,400);
         add(the_rack);
     }
 }

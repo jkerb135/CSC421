@@ -67,11 +67,15 @@ public class Rack extends JLayeredPane{
      * @param card The card value
      */
     public void addCardToRack(final Card card) {
-        card.setLocation(180 - (theRack.size() * 20), 250 - (theRack.size() * 25));
+        JLabel slotLbl = new JLabel(Integer.toString((theRack.size() + 1) * 5));
+        card.setLocation((theRack.size() * 20), 280 - (theRack.size() * 25));
+        slotLbl.setBounds(185 + (theRack.size() * 20), 350 - (theRack.size() * 25), 150, 25);
+        slotLbl.setForeground(Color.WHITE);
         card.setActionCommand("Rack");
         card.addActionListener(new cardListener());
-        card.addMouseListener(new mouseListener());
-        add(card, new Integer((rack_size - theRack.size())));
+        card.addMouseListener(new CardListeners());
+        add(card, new Integer(rack_size));
+        add(slotLbl, new Integer(rack_size));
         theRack.add(card);
     }
 
@@ -201,38 +205,4 @@ public class Rack extends JLayeredPane{
                 }
             }
     }
-
-    class mouseListener implements MouseListener{
-
-        @Override
-        public void mouseClicked(MouseEvent mouseEvent) {
-
-        }
-
-        @Override
-        public void mousePressed(MouseEvent mouseEvent) {
-
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent mouseEvent) {
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent mouseEvent) {
-            Card c = (Card) mouseEvent.getSource();
-            c.setBorder(BorderFactory.createLineBorder(Color.cyan, 2));
-            mouseEvent.consume();
-        }
-
-        @Override
-        public void mouseExited(MouseEvent mouseEvent) {
-            Card c = (Card) mouseEvent.getSource();
-            c.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-            mouseEvent.consume();
-
-        }
-    }
-
 }

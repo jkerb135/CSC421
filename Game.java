@@ -28,7 +28,7 @@ import java.util.List;
  * @version 1.0
  * @since 2015-26-2
  */
-public class Game extends JPanel implements MouseListener{
+public class Game{
     public static boolean
             debug = true,
             show_rack = false,
@@ -62,8 +62,6 @@ public class Game extends JPanel implements MouseListener{
     private JLayeredPane leftLayer, rightLayer;
     private Players players = Players.getInstanceOf();
     private Card drawPileBtn, discardPileBtn;
-    private MouseListener drawPileListener = new drawPileMouseListener();
-    private MouseListener discardPileListener = new discardPileListener();
 
 
     public Game(String[] player, String[] type){
@@ -82,7 +80,6 @@ public class Game extends JPanel implements MouseListener{
 
         theDeck = new Deck(Players.getInstanceOf().getPlayers().size());
         theDeck.dealDeck(Players.getInstanceOf());
-        createGui();
     }
     /**
      * The constructor sets the boolean flags for the cheats and then calls
@@ -138,7 +135,7 @@ public class Game extends JPanel implements MouseListener{
         System.out.println();
 
         if (Game.debug) {
-            Players.getInstanceOf().addPlayer(new HumanPlayer("Josh"));
+            Players.getInstanceOf().addPlayer(new EasyComputer("Josh"));
             Players.getInstanceOf().addPlayer(new EasyComputer("Bob"));
         } else {
             Display.getInstanceOf().mainMenu();
@@ -149,8 +146,6 @@ public class Game extends JPanel implements MouseListener{
 
         theDeck = new Deck(Players.getInstanceOf().getPlayers().size());
         theDeck.dealDeck(Players.getInstanceOf());
-
-        createGui();
 
         do {
             max_score = playRound(players,theDeck);
@@ -221,108 +216,6 @@ public class Game extends JPanel implements MouseListener{
     }
 
 
-
-    public void createGui(){
-        setLayout(null);
-        leftPanel.setBounds(0, 0, 400, 600);
-        leftPanel.setBackground(Color.YELLOW);
-
-        rightPanel.setBounds(400, 0, 400, 600);
-        rightPanel.setBackground(Color.CYAN);
-
-        playerNames = new JLabel[players.getPlayers().size()];
-        for(int i = 0, len = players.getPlayers().size(); i < len; i++){
-            playerNames[i] = new JLabel(players.getPlayer(i).getPlayerName());
-            if(i == 0) {
-                playerNames[i].setBounds(10, 10, 50, 20);
-            }
-            else{
-                playerNames[i].setBounds(playerNames[i - 1].getWidth() + 10, 10,
-                        100, 20);
-            }
-            currentPlayers.add(playerNames[i]);
-        }
-        currentPlayers.setBounds(0,0,400,50);
-        leftPanel.add(currentPlayers);
-
-        cards = new JPanel[players.getPlayers().size()];
-        Color[] color = {Color.GREEN,Color.blue,Color.CYAN};
-        for(int i = 0, len = players.getPlayers().size(); i < len; i++){
-            if(i == 0){
-                //leftLayer = players.getPlayer(i).Rack();
-                leftLayer.setBounds(0,325,400,600);
-                leftPanel.add(leftLayer);
-            }
-            else{
-                JPanel card;
-                card = new JPanel(null);
-                card.setBackground(color[i - 1]);
-               // rightLayer = players.getPlayer(i).Rack();
-                players.getPlayer(i).Rack().showHideRack(false);
-                rightLayer.setBounds(50, 10, 400, 600);
-                card.add(rightLayer, players.getPlayer(i).getPlayerName());
-                JLabel curr = new JLabel(players.getPlayer(i).getPlayerName
-                                ());
-                curr.setBounds(0,0,100,100);
-                curr.setBackground(Color.white);
-                        card.add(curr);
-                rightPanel.add(card);
-            }
-        }
-
-        add(leftPanel);
-        add(rightPanel);
-
-        theDeck.printDeck();
-        theDeck.printDiscard();
-
-
-        drawPileBtn = theDeck.getTopDraw();
-        discardPileBtn = theDeck.getTopDisc();
-
-        drawPileBtn.setBounds(10, 75, 180, 90);
-        discardPileBtn.setBounds(210, 75, 180, 90);
-
-        drawPileBtn.addMouseListener(drawPileListener);
-        discardPileBtn.addMouseListener(discardPileListener);
-
-        leftPanel.add(drawPileBtn);
-        leftPanel.add(discardPileBtn);
-
-
-        setSize(800, 600);
-        setVisible(true);
-
-        }
-
-    public void updateGui(){
-        leftPanel.remove(drawPileBtn);
-        leftPanel.remove(discardPileBtn);
-        leftPanel.remove(leftLayer);
-        leftPanel.invalidate();
-
-        discardPileBtn = theDeck.getTopDisc();
-        drawPileBtn = theDeck.getTopDraw();
-
-        drawPileBtn.setBounds(10, 75, 180, 90);
-        discardPileBtn.setBounds(210, 75, 180, 90);
-
-        updateRack();
-
-        removeMouseListeners(drawPileBtn);
-        removeMouseListeners(discardPileBtn);
-
-        drawPileBtn.addMouseListener(drawPileListener);
-        discardPileBtn.addMouseListener(discardPileListener);
-
-        leftPanel.add(drawPileBtn);
-        leftPanel.add(discardPileBtn);
-
-        leftPanel.revalidate();
-        leftPanel.repaint();
-
-    }
-
     public void updateRack(){
         for(int i = 0, len = players.getPlayers().size(); i < len; i++){
             if(i == 0){
@@ -344,106 +237,6 @@ public class Game extends JPanel implements MouseListener{
                 card.add(curr);
                 rightPanel.add(card);
             }
-        }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        System.out.println(e.getSource());
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    private class drawPileMouseListener implements MouseListener{
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                isDrawPileClicked = true;
-                //players.getPlayer(0).Rack().setCardInUse(drawPileBtn.getCard
-                        //(), );
-                drawPileBtn.setCardDirection(true);
-                e.consume();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                drawPileBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                drawPileBtn.setBorder(BorderFactory.createLineBorder
-                        (Color.RED, 2));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                drawPileBtn.setBorder(BorderFactory.createLineBorder(Color
-                        .black, 2));
-            }
-    }
-
-    private class discardPileListener implements MouseListener{
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if(isDrawPileClicked){
-                theDeck.discard(theDeck.drawTopCard());
-                updateGui();
-            }
-            isDrawPileClicked = false;
-            e.consume();
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            discardPileBtn.setBorder(BorderFactory.createLineBorder
-                    (Color.RED, 2));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            discardPileBtn.setBorder(BorderFactory.createLineBorder(Color
-                    .black, 2));
-        }
-    }
-
-    private void removeMouseListeners(Card theCard){
-        for(MouseListener m : theCard.getMouseListeners()){
-            theCard.removeMouseListener(m);
         }
     }
 }

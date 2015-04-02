@@ -41,7 +41,15 @@ public abstract class Computer extends Player{
                     a decision based upon the top discard and the draw pile.
      **/
     public abstract boolean doTurn(Deck theDeck);
-    public abstract void doGuiTurn(boolean firstDecision, Deck theDeck);
+    public abstract void doGuiTurn(Card draw, Card discard, Deck theDeck);
     public abstract boolean whichPile(Deck theDeck);
+
+    public static void waitForAI(int time){
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+    }
 
 }

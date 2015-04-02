@@ -12,6 +12,8 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.TimerTask;
 
 /**
@@ -19,14 +21,19 @@ import java.util.TimerTask;
  * to allow a computer AI to play the game. Easy Computer is a rudimentary AI
  * it is very unlikely to win, if you were to place two of them against each
  * other it will take a long time for them to win.
+ *
  * @author Josh Kerbaugh
  * @version 1.0
- * @since 2015-26-2
  * @see Computer
+ * @since 2015-26-2
  */
 public class EasyComputer extends Computer {
+    private int alpha = 255;
+    private int increment = -5;
+
     /**
      * Constructs the easy computer with the defined playerName
+     *
      * @param playerName sets the computers name.
      */
     protected EasyComputer(String playerName) {
@@ -34,17 +41,19 @@ public class EasyComputer extends Computer {
     }
 
     /**
-     *  Simulate a single turn made by the AI player. A decision is made
-     *  without concern of what is already present in the rack. The decision
-     *  is made by using integer division to determine the slot in the rack.
+     * Simulate a single turn made by the AI player. A decision is made
+     * without concern of what is already present in the rack. The decision
+     * is made by using integer division to determine the slot in the rack.
+     *
      * @param theDeck the instance of the deck class used for the AI to make
      * @return Rack().checkForRacko Boolean whether the AI has won the round
      * with the most recent turn.
      */
     @Override
     public boolean doTurn(Deck theDeck) {
+        int maxCards = theDeck.getCardCount();
         try {
-            if(Game.show_rack){
+            if (Game.show_rack) {
                 Rack().printRack();
             }
 
@@ -58,93 +67,108 @@ public class EasyComputer extends Computer {
         Card newCard;
 
 
-        if(whichPile(theDeck)){
+        if (whichPile(theDeck)) {
+            System.out.println("DRAWING TOP DRAW");
             newCard = theDeck.drawTopCard();
-        }
-        else{
+        } else {
+            System.out.println("DRAWING TOP DISCARD");
             newCard = theDeck.drawTopDiscard();
         }
 
-        Integer newCardValue = newCard.cardValue;
+        int slotChoice = newCard.cardValue / (maxCards / 10);
 
-        int slotChoice = Math.round((float)newCardValue /
-                ((float)theDeck.getCardCount() / (float)9));
+        if (slotChoice == 10) {
+            slotChoice = 9;
+        }
 
         Card oldCard = Rack().getCard(slotChoice);
-        Integer oldCardValue = oldCard.cardValue;
 
-        if(oldCardValue < newCardValue && slotChoice != 9){
-            oldCard = Rack().getCard(slotChoice + 1);
-        }
-        else if (oldCardValue > newCardValue && slotChoice != 0){
-            oldCard = Rack().getCard(slotChoice - 1);
-        }
+        Card c = Rack().getCard(Rack().getRack().indexOf(oldCard));
+
+        System.out.println("REPLACED \t" + oldCard.cardValue + " with " + newCard.cardValue);
 
         theDeck.discard(Rack().replaceCardInRack(oldCard, newCard));
 
         return Rack().checkForRacko();
     }
 
-    public void doGuiTurn(boolean firstDecision, Deck theDeck){
+    public void doGuiTurn(Card draw, Card discard, Deck theDeck) {
+        waitForAI(2000);
         Integer newCard;
+        int maxCards = theDeck.getCardCount();
 
-        if(firstDecision){
+        if (whichPile(theDeck)) {
+            System.out.println("Peeking TOP DRAW");
+            draw.doClick();
             newCard = theDeck.peekTopDraw();
-        }
-        else{
+        } else {
+            System.out.println("Peeking TOP DISCARD");
+            discard.doClick();
             newCard = theDeck.peekTopDiscard();
         }
 
-        Integer newCardValue = newCard;
+        int slotChoice = newCard / (maxCards / 10);
 
-        int slotChoice = Math.round((float)newCardValue /
-                ((float)theDeck.getCardCount() / (float)9));
-
-        Card oldCard = Rack().getCard(slotChoice);
-        Integer oldCardValue = oldCard.cardValue;
-
-        if(oldCardValue < newCardValue && slotChoice != 9){
-            oldCard = Rack().getCard(slotChoice + 1);
-        }
-        else if (oldCardValue > newCardValue && slotChoice != 0){
-            oldCard = Rack().getCard(slotChoice - 1);
+        if (slotChoice == 10) {
+            slotChoice = 9;
         }
 
+        Card c = the_rack.getRack().get(slotChoice);
 
+        waitForAI(2000);
+        Timer rackChange = flashBorder(c);
+        rackChange.start();
+        waitForAI(2000);
+        c.doClick();
+        rackChange.stop();
+        c.setBorder(BorderFactory.createLineBorder(Color.black, 2));
 
-        Card c =  Rack().getCard(Rack().getRack().indexOf(oldCard));
-        try {
-            Thread.sleep(1500);
-            c.setBorder(BorderFactory.createLineBorder(Color.cyan, 2));
-            Thread.sleep(1500);
-            c.doClick();
-            c.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
-     *
      * @param theDeck the instance of the deck class used for the AI to make
      * @return whichPile A decision on which pile the AI should draw from
      */
-    public boolean whichPile(Deck theDeck){
-        int peekCard, discardSlot, betterSlot;
+    public boolean whichPile(Deck theDeck) {
+        int rackCard, discardSlot, betterSlot;
+        int maxCards = theDeck.getCardCount();
 
-        discardSlot = Math.round((float)theDeck.peekTopDiscard() /
-                ((float)theDeck.getCardCount() / (float)9));
+        discardSlot = theDeck.peekTopDiscard() / (maxCards / 10);
 
-        peekCard = Rack().getCard(discardSlot).cardValue;
+        if (discardSlot == 10) {
+            discardSlot = 9;
+        }
 
-        betterSlot = Math.round((float)peekCard /
-                ((float)theDeck.getCardCount() / (float)9));
+        rackCard = Rack().getCard(discardSlot).cardValue;
 
+        betterSlot = rackCard / (maxCards / 10);
 
+        if (betterSlot == 10) {
+            betterSlot = 9;
+        }
 
-        if(betterSlot == discardSlot)
+        if (betterSlot == discardSlot)
             return false;
         else
             return true;
+    }
+
+    private Timer flashBorder(final Card c) {
+        Timer timer = new Timer(30, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alpha += increment;
+                if (alpha >= 255) {
+                    alpha = 255;
+                    increment = -increment;
+                }
+                if (alpha <= 0) {
+                    alpha = 0;
+                    increment = -increment;
+                }
+                c.setBorder(BorderFactory.createLineBorder(new Color(0, 204, 0, alpha), 4));
+            }
+        });
+        return timer;
     }
 }

@@ -21,10 +21,10 @@ public class CheatMenuPane  extends JPanel {
             public void stateChanged(ChangeEvent e) {
                 if (debug_Cheat.isSelected()) {
                     debug_Cheat.setText("ON");
-                    NewTestGui.debug = true;
+                    Racko.debug = true;
                 } else {
                     debug_Cheat.setText("OFF");
-                    NewTestGui.debug = false;
+                    Racko.debug = false;
                 }
             }
         });
