@@ -26,6 +26,7 @@ public abstract class Player extends JPanel{
     private int player_score;
     protected Rack the_rack;
     public boolean won_round;
+    public boolean won_game;
     protected boolean isComputer;
     public static volatile boolean wasTurnTaken = false;
 

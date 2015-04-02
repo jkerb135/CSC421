@@ -214,29 +214,4 @@ public class Game{
         round_counter++;
         return Players.getInstanceOf().getHighestScore();
     }
-
-
-    public void updateRack(){
-        for(int i = 0, len = players.getPlayers().size(); i < len; i++){
-            if(i == 0){
-                //leftLayer = players.getPlayer(i).Rack();
-                leftLayer.setBounds(0,325,400,600);
-                leftPanel.add(leftLayer);
-            }
-            else{
-                JPanel card;
-                card = new JPanel(null);
-                //leftLayer = players.getPlayer(i).Rack();
-                players.getPlayer(i).Rack().showHideRack(false);
-                leftLayer.setBounds(50, 10, 400, 600);
-                card.add(leftLayer, players.getPlayer(i).getPlayerName());
-                JLabel curr = new JLabel(players.getPlayer(i).getPlayerName
-                        ());
-                curr.setBounds(0,0,100,100);
-                curr.setBackground(Color.white);
-                card.add(curr);
-                rightPanel.add(card);
-            }
-        }
-    }
 }

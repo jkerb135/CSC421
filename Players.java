@@ -111,7 +111,7 @@ public class Players {
      */
     public String getWinner(){
         for(Player player : thePlayers){
-            if(player.won_round){
+            if(player.won_game){
                 return player.getPlayerName();
             }
         }

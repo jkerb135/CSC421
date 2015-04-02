@@ -30,6 +30,7 @@ public class Score {
      * @see Score#calcRunScore
      */
     public static void scoreRound(){
+        if(Racko.debug) points_for_racko = 500;
         Players players = Players.getInstanceOf();
         for(int i = 0, len = players.getPlayers().size(); i < len; i++){
             Player player = players.getPlayer(i);

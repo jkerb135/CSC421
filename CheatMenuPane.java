@@ -10,7 +10,7 @@ import java.util.Comparator;
 /**
  * Created by Josh on 3/31/2015.
  */
-public class CheatMenuPane  extends JPanel {
+public class CheatMenuPane extends JPanel {
     private JToggleButton debug_Cheat, rack_Cheat, order_Cheat;
 
     public CheatMenuPane() {
@@ -85,22 +85,27 @@ public class CheatMenuPane  extends JPanel {
                     if (orderTo != null) {
                         order_Cheat.setText("CLICK");
                         order_Cheat.setSelected(false);
-                        Player player = Players.getInstanceOf().getPlayer(0);
-                        ArrayList<Card> rack = player.Rack().getRack();
-                        ArrayList<Integer> sorted = new ArrayList<Integer>();
+                        Players players = Players.getInstanceOf();
+                        for (Player player : players.getPlayers()) {
+                            if (player instanceof HumanPlayer) {
 
-                        for (int i = 0; i < rack.size(); i++) {
-                            sorted.add(rack.get(i).cardValue);
-                        }
+                                ArrayList<Card> rack = player.Rack().getRack();
+                                ArrayList<Integer> sorted = new ArrayList<Integer>();
 
-                        Collections.sort(sorted);
-                        Collections.shuffle(sorted.subList(Integer.parseInt
-                                        (orderTo),sorted.size()));
+                                for (int i = 0; i < rack.size(); i++) {
+                                    sorted.add(rack.get(i).cardValue);
+                                }
 
-                        for(int i = 0, len = rack.size(); i < len; i++){
-                            Card c = rack.get(i);
-                            c.setText(Integer.toString(sorted.get(i)));
-                            c.cardValue = sorted.get(i);
+                                Collections.sort(sorted);
+                                Collections.shuffle(sorted.subList(Integer.parseInt
+                                        (orderTo), sorted.size()));
+
+                                for (int i = 0, len = rack.size(); i < len; i++) {
+                                    Card c = rack.get(i);
+                                    c.setText(Integer.toString(sorted.get(i)));
+                                    c.cardValue = sorted.get(i);
+                                }
+                            }
                         }
                     }
                 }

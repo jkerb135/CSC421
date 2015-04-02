@@ -81,10 +81,9 @@ public class Rack extends JLayeredPane{
             card.setCardDirection(false);
         }
         else {
-            card.addActionListener(new cardListener());
             card.addMouseListener(new CardListeners());
         }
-
+        card.addActionListener(new cardListener());
         add(card, new Integer(rack_size));
         add(slotLbl, new Integer(rack_size));
         theRack.add(card);

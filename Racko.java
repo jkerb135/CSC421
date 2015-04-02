@@ -11,9 +11,13 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Creates a new instance of the game and passes the Game object the command
@@ -24,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
  * @since 2015-26-2
  */
 public class Racko extends JApplet implements ActionListener {
-    public static boolean
+    public volatile static boolean
             debug = false,
             show_rack = false,
             end_turns = false,
@@ -73,6 +77,8 @@ public class Racko extends JApplet implements ActionListener {
         setBounds(0, 0, 800, 600);
         initDeck(getParameter("players").split(","));
 
+        setBackground(Color.DARK_GRAY);
+
         glassPane = new GlassPane();
         setGlassPane(glassPane);
 
@@ -82,7 +88,6 @@ public class Racko extends JApplet implements ActionListener {
         repaint();
 
         setSize(800, 600);
-
     }
 
     public void start() {
@@ -170,6 +175,7 @@ public class Racko extends JApplet implements ActionListener {
     public void addPlayers() {
         playerPanel.setBounds(0, 200, 400, 600);
         computerPanel.setBounds(400, 200, 400, 600);
+        //Collections.shuffle(players.getPlayers());
         for (Player p : players.getPlayers()) {
             if ((p instanceof Computer)) {
                 p.setBackground(Color.DARK_GRAY);
@@ -243,7 +249,7 @@ public class Racko extends JApplet implements ActionListener {
     public void playGame() {
         gameThread = new Thread() {
             public void run() {
-                while (maxScore < winningScore) {
+                while(maxScore < winningScore){
                     while (!isRoundDone) {
                         int i = 0;
                         int len = Players.getInstanceOf().getPlayers().size();
@@ -274,6 +280,7 @@ public class Racko extends JApplet implements ActionListener {
                                     currentPlayer.the_rack.setCardInUse(null);
                                 }
                             }
+
                             drawTimer.stop();
                             updateDeck();
                             repaint();
@@ -284,14 +291,18 @@ public class Racko extends JApplet implements ActionListener {
                                 currentPlayer.won_round = true;
                                 Score.scoreRound();
                                 maxScore = players.getHighestScore();
-                                currentPlayer = players.getPlayer(0);
-                                updateScores();
-                                resetFlags();
-                                updateAfterRound();
                                 break;
                             }
                             resetFlags();
                         }
+                    }
+                    if(maxScore >= winningScore){
+                        currentPlayer.won_game = true;
+                        showWinningScreen();
+                    }else {
+                        updateScores();
+                        resetFlags();
+                        updateAfterRound();
                     }
                 }
             }
@@ -304,7 +315,62 @@ public class Racko extends JApplet implements ActionListener {
         discardClicked = false;
         turnTaken = false;
         isRoundDone = false;
-        currentPlayer = null;
+    }
+
+    public void showWinningScreen(){
+        getContentPane().removeAll();
+        JPanel winningScreen = new JPanel(null);
+        winningScreen.setBounds(0,0,800,600);
+        setContentPane(winningScreen);
+        winningScreen.setBackground(Color.DARK_GRAY);
+
+        JLabel gameOver = new JLabel("Game Over");
+        gameOver.setForeground(Color.WHITE);
+        gameOver.setBounds(0, 0, 800, 50);
+        gameOver.setFont(new Font("Serif", 1, 55));
+        gameOver.setHorizontalAlignment(SwingConstants.CENTER);
+
+        Dimension d = new Dimension();
+        JLabel[][] winNames = new JLabel[players.getPlayers().size()][2];
+        for(int i = 0, len = players.getPlayers().size(); i < len; i++) {
+            Player p = players.getPlayer(i);
+            JLabel name = new JLabel(p.getPlayerName());
+            JLabel score = new JLabel(Integer.toString(p.getPlayerScore()));
+
+            name.setBounds(325, 150 + (i * 35), 100, 25);
+            score.setBounds(435, 150 + (i * 35), 100, 25);
+            name.setFont(new Font("Serif", 1, 25));
+            score.setFont(new Font("Serif", 1, 25));
+            name.setForeground(Color.WHITE);
+            score.setForeground(Color.WHITE);
+
+            winNames[i][0] = name;
+            winNames[i][1] = score;
+
+        }
+
+        Arrays.sort(winNames, new Comparator<JLabel[]>() {
+            @Override
+            public int compare(JLabel[] o1, JLabel[] o2) {
+                final Integer score1 = Integer.parseInt(o1[1].getText());
+                final Integer score2 = Integer.parseInt(o2[1].getText());
+                return score2.compareTo(score1);
+            }
+
+        });
+
+        winNames[0][0].setForeground(Color.GREEN);
+        winNames[0][1].setForeground(Color.GREEN);
+
+        for (final JLabel[] s : winNames) {
+            getContentPane().add(s[0]);
+            getContentPane().add(s[1]);
+        }
+
+        getContentPane().add(gameOver);
+        repaint();
+
+
     }
 
     public void actionPerformed(ActionEvent e) {
