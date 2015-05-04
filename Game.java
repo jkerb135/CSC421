@@ -11,10 +11,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,45 +26,33 @@ import java.util.List;
  */
 public class Game{
     public static boolean
-            debug = true,
-            show_rack = false,
-            end_turns = false,
-            load_deck = false,
-            card_order = false,
-            isDrawPileClicked = false,
-            isDiscardPileClicked = false;
+            debug = true;
+    public static boolean show_rack = false;
+    public static boolean end_turns = false;
+    public static boolean load_deck = false;
+    public static boolean card_order = false;
 
     public static int
             end_turn_value = 0,
             card_order_value = 0,
             round_counter = 0;
 
-    public static List<Integer> loaded_cards = new ArrayList<Integer>();
+    public static final List<Integer> loaded_cards = new ArrayList<Integer>();
 
     private Deck theDeck;
 
-    private int max_score,
-            winning_score = 500;
+    private boolean isRoundDone;
 
-    private boolean isRoundDone, isGameDone;
-
-    private Player current;
-
-    private JPanel currentPlayers = new JPanel(null);
-    private JPanel leftPanel = new JPanel(null);
-    private JPanel rightPanel = new JPanel(new CardLayout());
-    private JPanel[] cards;
-    private JLabel[] playerNames;
-    private JLayeredPane leftLayer, rightLayer;
-    private Players players = Players.getInstanceOf();
-    private Card drawPileBtn, discardPileBtn;
+    private final JPanel leftPanel = new JPanel(null);
+    private final JPanel rightPanel = new JPanel(new CardLayout());
+    private final Players players = Players.getInstanceOf();
 
 
     public Game(String[] player, String[] type){
         System.out.print(player.length);
 
         for(int i = 0, len = player.length; i < len; i++){
-            if(type[i] == "0"){
+            if(type[i].equals("0")){
                 players.addPlayer(new HumanPlayer(player[i]));
             }
             else{
@@ -147,6 +131,8 @@ public class Game{
         theDeck = new Deck(Players.getInstanceOf().getPlayers().size());
         theDeck.dealDeck(Players.getInstanceOf());
 
+        int max_score;
+        int winning_score = 500;
         do {
             max_score = playRound(players,theDeck);
 
@@ -183,7 +169,7 @@ public class Game{
         for (int currentPlayer = 0, len = Players.getInstanceOf()
                 .getPlayers
                 ().size(); currentPlayer < len; currentPlayer++) {
-            current = players.getPlayer(currentPlayer);
+            Player current = players.getPlayer(currentPlayer);
 
             Output.Greenln("Current Player: " +
                     current.getPlayerName() + "\n");
@@ -214,4 +200,6 @@ public class Game{
         round_counter++;
         return Players.getInstanceOf().getHighestScore();
     }
+
+
 }

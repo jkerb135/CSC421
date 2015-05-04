@@ -7,9 +7,7 @@
  * Purpose:         This class is used to check whether a Player has gotten
  * racko in their rack.
  */
-import java.lang.Comparable;import java.lang.Iterable;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * This class is used to check whether a Player has gotten racko in their rack.

@@ -1,6 +1,15 @@
 import java.io.PrintStream;
 import java.text.MessageFormat;
-
+/**
+ * The Debug stream is used for debugging purposes to show the class and line
+ * number the executed print line comes from. Its uses are to help locate
+ * errors in files faster.
+ *
+ * @author Josh Kerbaugh
+ * @version 1.0
+ * @see PrintStream
+ * @since 2015-26-2
+ */
 public class DebugStream extends PrintStream {
     private static final DebugStream INSTANCE = new DebugStream();
 

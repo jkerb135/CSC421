@@ -21,17 +21,12 @@ import java.io.IOException;
  * @since 2015-26-2
  */
 public abstract class Player extends JPanel{
-    public int rack_size = Racko.rack_size;
-    private String player_name;
+    public final int rack_size = Racko.rack_size;
+    private final String player_name;
     private int player_score;
     protected Rack the_rack;
     public boolean won_round;
     public boolean won_game;
-    protected boolean isComputer;
-    public static volatile boolean wasTurnTaken = false;
-
-    private JLabel playerNameLbl = new JLabel();
-    private Dimension d;
 
     /**
      * Constructs the player with the defined playerName and sets won round
@@ -59,6 +54,10 @@ public abstract class Player extends JPanel{
         repaint();
     }
 
+    /**
+     * Sets the rack to its respective size specified by Racko.rack_size;
+     * @see Racko
+     */
     public void initializeRack(){
         the_rack = new Rack(rack_size);
     }
@@ -106,6 +105,11 @@ public abstract class Player extends JPanel{
     public abstract boolean doTurn(Deck theDeck) throws
             IOException;
 
+    /**
+     * Repaints the rack to the JLayered Pane after the cards have been dealt
+     * to the rack.
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);

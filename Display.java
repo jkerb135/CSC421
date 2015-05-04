@@ -65,8 +65,8 @@ public class Display {
         Output.Greenln("Please Choose A Menu Option.");
 
         for (int i = 0, len = menu_opts.length; i < len; i++) {
-            Output.Greenln("\t" + (i + 1) 
-	    + menu_opts[i]);
+            Output.Greenln("\t" + (i + 1)
+                    + menu_opts[i]);
             choices += Integer.toString(i + 1);
         }
         Output.Green("Choice -> ");
@@ -75,7 +75,7 @@ public class Display {
         menuChoice = InputReader.getChoice(choices);
 
         if (menuChoice == '1') {
-           playersMenu();
+            playersMenu();
         }
         else if (menuChoice == '2') {
             Output.Greenln("\nMultiplayer Not Implemented\n");
@@ -153,7 +153,7 @@ public class Display {
         Output.Green("Choice -> ");
         char menuChoice = InputReader.getChoice(choices);
         return menuChoice;
-	
+
     }
 
 }

@@ -12,8 +12,6 @@
  * the computer as a player.
  */
 
-import javax.swing.*;
-
 /**
  * Extends the Player object to provide a level of abstraction between the
  * Human Player and the Computer Player implementations
@@ -30,7 +28,6 @@ public abstract class Computer extends Player{
      */
     protected Computer(String playerName) {
         super(playerName);
-        isComputer = true;
     }
 
     /**
@@ -41,12 +38,31 @@ public abstract class Computer extends Player{
                     a decision based upon the top discard and the draw pile.
      **/
     public abstract boolean doTurn(Deck theDeck);
+
+    /**
+     * Simulate a single turn made by the AI player. A decision is made
+     * without concern of what is already present in the rack. The decision
+     * is made by using integer division to determine the slot in the rack.
+     * This method can interact with the action listeners on cards.
+     * @param draw
+     * @param discard
+     * @param theDeck
+     */
     public abstract void doGuiTurn(Card draw, Card discard, Deck theDeck);
+
+    /**
+     * @param theDeck the instance of the deck class used for the AI to make
+     * @return whichPile A decision on which pile the AI should draw from
+     */
     public abstract boolean whichPile(Deck theDeck);
 
-    public static void waitForAI(int time){
+
+    /**
+     * Method to slow down an AI's turn, used to simulate thinking.
+     */
+    public static void waitForAI(){
             try {
-                Thread.sleep(time);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

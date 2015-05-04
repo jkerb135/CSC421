@@ -18,7 +18,6 @@
  * @since 2015-26-2
  */
 public class Score {
-    private static int points_for_racko = 75;
 
     /**
      * Scores the round after a player has gone racko. Places 75 points plus
@@ -30,12 +29,12 @@ public class Score {
      * @see Score#calcRunScore
      */
     public static void scoreRound(){
-        if(Racko.debug) points_for_racko = 500;
         Players players = Players.getInstanceOf();
         for(int i = 0, len = players.getPlayers().size(); i < len; i++){
             Player player = players.getPlayer(i);
             int run = player.Rack().checkRackForSuccession();
             if(player.won_round){
+                int points_for_racko = 75;
                 player.setPlayerScore(calcRunScore(run) + points_for_racko);
             }
             else{

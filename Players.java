@@ -17,7 +17,6 @@ import java.util.LinkedList;
  */
 public class Players {
     public static final Players players = new Players();
-
     private static final LinkedList<Player> thePlayers = new LinkedList<Player>();
 
     /**
@@ -74,7 +73,6 @@ public class Players {
      * Returns the highest score
      * Used to check if the highest score is over the game winning value
      * @return max_score
-     * @see Game#winning_score
      * @see Player
      * @see Player#getPlayerScore
      */

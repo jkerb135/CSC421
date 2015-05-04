@@ -12,11 +12,6 @@
  * Assumptions:     60 cards will always be the max value for gameplay.
  */
 
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,15 +27,9 @@ import java.util.Random;
  * @since 2015-26-2
  */
 public class Deck{
-    protected volatile boolean wasCardDiscarded = false;
     protected static int number_of_cards;
     protected int number_of_players = 1;
-    protected int rack_size = 10;
     protected int deal_count = 40;
-    protected static volatile boolean isDiscardClicked, isDrawClicked;
-
-    private boolean drawClicked, discardClicked;
-
     protected ArrayList<Card> draw_pile, discard_pile;
 
     /**
@@ -51,7 +40,6 @@ public class Deck{
         initializeDeck(numPlayers);
     }
 
-    public static Integer getNumCards(){return number_of_cards; };
     /**
      * Initializes the predefined variables so the number_of_cards and
      * deal_count have the correct values.
@@ -62,7 +50,6 @@ public class Deck{
         number_of_cards =
                 (Racko.rack_size * numPlayers) + (Racko.rack_size * 2);
         deal_count = (Racko.rack_size * number_of_players);
-        rack_size = Racko.rack_size;
 
         draw_pile = new ArrayList<Card>();
 
@@ -73,6 +60,9 @@ public class Deck{
         shuffleDeck();
     }
 
+    /**
+     * Resets the deck back to its original state when the game was initialized.
+     */
     public void reset(){
         initializeDeck(number_of_players);
     }
@@ -112,32 +102,22 @@ public class Deck{
         discard_pile.add(new Card(firstCard.cardValue));
     }
 
-
-    public void reDeal(Players thePlayers){
-        ArrayList<Card> tmp = new ArrayList<Card>(draw_pile);
-        for (int i = 0; i < deal_count; i++) {
-            System.out.println("DEAL COUNT \t" + i + " of " + deal_count);
-            System.out.println("Player \t" + i % number_of_players);
-            thePlayers.getPlayer(i % number_of_players).Rack().updateCardsOnGui(new Card(tmp.get(i).cardValue));
-            draw_pile.remove(tmp.get(i));
-        }
-
-        discard_pile = new ArrayList<Card>(draw_pile.size());
-
-        Card firstCard = draw_pile.get(0);
-        draw_pile.remove(firstCard);
-        discard_pile.add(new Card(firstCard.cardValue));
-    }
-
-
+    /**
+     * Gets the top card off the draw pile. For use with the GUI.
+     * @return top card
+     */
     public Card getTopDraw(){
         return draw_pile.get(0);
     }
 
+    /**
+     * Gets the top card off the discard pile. For use with the GUI.
+     * @return top discard
+     */
     public Card getTopDisc(){
-        Card discard = discard_pile.get(discard_pile.size() - 1);
-        return discard;
+        return discard_pile.get(discard_pile.size() - 1);
     }
+
     /**
      * Simulates a Player drawing a card off the top of the draw pile.
      * @return theCard The top card off the draw pile.
@@ -181,8 +161,6 @@ public class Deck{
         return theCard;
     }
 
-
-
     /**
      * Simulates a Player discarding a card to the discard pile. If the draw
      * pile is empty the deck will be reshuffled.
@@ -200,7 +178,6 @@ public class Deck{
         }
         discard_pile.add(card);
         draw_pile.remove(card);
-        wasCardDiscarded = true;
     }
 
     /**
@@ -236,17 +213,4 @@ public class Deck{
         System.out.println();
     }
 
-    /**
-     * Used to load the deck in favor of player one. This is a debugging
-     * function
-     */
-    private void loadTheDeck(){
-        ArrayList<Integer> tmp = new ArrayList<Integer>(Game.loaded_cards);
-        for(int i = 0; tmp.size() != 0;
-            i = number_of_players + i){
-            int idx = draw_pile.indexOf(tmp.get(0));
-            tmp.remove(0);
-            Collections.swap(draw_pile, i ,idx);
-        }
-    }
 }

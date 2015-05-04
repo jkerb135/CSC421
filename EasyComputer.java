@@ -1,8 +1,8 @@
 /**
  * Author:          Josh Kerbaugh
  * Creation Date:   2/17/2015
- * Due Date:        2/26/2015
- * Assignment:      Assignment 1
+ * Due Date:        4/3/2015
+ * Assignment:      Assignment 2
  * Filename:        EasyComputer.java
  * Purpose:         Extends the computer player object by implementing doTurn
  * to allow a computer AI to play the game. Easy Computer is a rudimentary AI
@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.TimerTask;
 
 /**
  * Extends the computer player object by implementing doTurn
@@ -83,17 +82,25 @@ public class EasyComputer extends Computer {
 
         Card oldCard = Rack().getCard(slotChoice);
 
-        Card c = Rack().getCard(Rack().getRack().indexOf(oldCard));
-
-        System.out.println("REPLACED \t" + oldCard.cardValue + " with " + newCard.cardValue);
+        System.out.println("REPLACED \t" + oldCard.cardValue + " with " +
+                newCard.cardValue);
 
         theDeck.discard(Rack().replaceCardInRack(oldCard, newCard));
 
         return Rack().checkForRacko();
     }
 
+    /**
+     * Simulate a single turn made by the AI player. A decision is made
+     * without concern of what is already present in the rack. The decision
+     * is made by using integer division to determine the slot in the rack.
+     * This method can interact with the action listeners on cards.
+     * @param draw
+     * @param discard
+     * @param theDeck
+     */
     public void doGuiTurn(Card draw, Card discard, Deck theDeck) {
-        waitForAI(2000);
+        waitForAI();
         Integer newCard;
         int maxCards = theDeck.getCardCount();
 
@@ -115,10 +122,10 @@ public class EasyComputer extends Computer {
 
         Card c = the_rack.getRack().get(slotChoice);
 
-        waitForAI(2000);
+        waitForAI();
         Timer rackChange = flashBorder(c);
         rackChange.start();
-        waitForAI(2000);
+        waitForAI();
         c.doClick();
         rackChange.stop();
         c.setBorder(BorderFactory.createLineBorder(Color.black, 2));
@@ -147,14 +154,17 @@ public class EasyComputer extends Computer {
             betterSlot = 9;
         }
 
-        if (betterSlot == discardSlot)
-            return false;
-        else
-            return true;
+        return betterSlot != discardSlot;
     }
 
+    /**
+     * Shows a flashing border after the AI's move to let the players know
+     * what the AI did during its turn.
+     * @param c
+     * @return timer
+     */
     private Timer flashBorder(final Card c) {
-        Timer timer = new Timer(30, new ActionListener() {
+        return new Timer(30, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alpha += increment;
@@ -166,9 +176,9 @@ public class EasyComputer extends Computer {
                     alpha = 0;
                     increment = -increment;
                 }
-                c.setBorder(BorderFactory.createLineBorder(new Color(0, 204, 0, alpha), 4));
+                c.setBorder(BorderFactory.createLineBorder(new Color(0, 204,
+                        0,  alpha), 4));
             }
         });
-        return timer;
     }
 }

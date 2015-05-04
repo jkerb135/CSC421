@@ -1,20 +1,37 @@
+/**
+ * Author:          Josh Kerbaugh
+ * Creation Date:   2/20/2015
+ * Due Date:        4/3/2015
+ * Assignment:      Assignment 2
+ * Filename:        Rack.java
+ * Purpose:         The CheatMenauPane class is where each cheat will be
+ * implemented and the toggle buttons that allow the cheats
+ * to be enabled or disabled
+ */
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 
 /**
- * Created by Josh on 3/31/2015.
+ * The CheatMenauPane class is where each cheat will be
+ * implemented and the toggle buttons that allow the cheats
+ * to be enabled or disabled. Extends JPanel for ease of access for
+ * JOptionDialog
+ *
+ * @author Josh Kerbaugh
+ * @version 1.0
+ * @since 2015-26-2
  */
 public class CheatMenuPane extends JPanel {
-    private JToggleButton debug_Cheat, rack_Cheat, order_Cheat;
+    private final JToggleButton debug_Cheat;
+    private final JToggleButton rack_Cheat;
+    private final JToggleButton order_Cheat;
+    private final JToggleButton end_Cheat;
 
     public CheatMenuPane() {
-
         debug_Cheat = new JToggleButton("OFF");
         debug_Cheat.addChangeListener(new ChangeListener() {
             @Override
@@ -37,8 +54,8 @@ public class CheatMenuPane extends JPanel {
         rackLbl.setBounds(0, 110, 100, 25);
 
         rack_Cheat = new JToggleButton("OFF");
-        rack_Cheat.setBounds(debug_Cheat.getX(), debug_Cheat.getHeight() + 10, 60,
-                30);
+        rack_Cheat.setBounds(debug_Cheat.getX(), debug_Cheat.getHeight() +
+                10, 60, 30);
         rack_Cheat.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -64,15 +81,16 @@ public class CheatMenuPane extends JPanel {
 
         JLabel orderRack = new JLabel("Order Rack");
         orderRack.setBounds(0, 110, 100, 25);
-
         order_Cheat = new JToggleButton("CLICK");
-        order_Cheat.setBounds(debug_Cheat.getX(), debug_Cheat.getHeight() + 10, 60,
-                30);
+        order_Cheat.setBounds(debug_Cheat.getX(), debug_Cheat.getHeight() +
+                        10, 60, 30);
+
         order_Cheat.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if (order_Cheat.isSelected()) {
-                    Object[] possibilities = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+                    Object[] possibilities = {"1", "2", "3", "4", "5", "6",
+                            "7", "8", "9", "10"};
                     String orderTo = (String) JOptionPane.showInputDialog(
                             null,
                             "Order Rack To Which Slot?",
@@ -92,15 +110,16 @@ public class CheatMenuPane extends JPanel {
                                 ArrayList<Card> rack = player.Rack().getRack();
                                 ArrayList<Integer> sorted = new ArrayList<Integer>();
 
-                                for (int i = 0; i < rack.size(); i++) {
-                                    sorted.add(rack.get(i).cardValue);
+                                for (Card aRack : rack) {
+                                    sorted.add(aRack.cardValue);
                                 }
 
                                 Collections.sort(sorted);
-                                Collections.shuffle(sorted.subList(Integer.parseInt
-                                        (orderTo), sorted.size()));
+                                Collections.shuffle(sorted.subList(Integer
+                                        .parseInt(orderTo), sorted.size()));
 
-                                for (int i = 0, len = rack.size(); i < len; i++) {
+                                for (int i = 0, len = rack.size(); i < len; i++)
+                                {
                                     Card c = rack.get(i);
                                     c.setText(Integer.toString(sorted.get(i)));
                                     c.cardValue = sorted.get(i);
@@ -112,11 +131,42 @@ public class CheatMenuPane extends JPanel {
             }
         });
 
-        add(debugLbl);
-        add(debug_Cheat);
+        JLabel endRoundsLbl = new JLabel("End Rounds In");
+        endRoundsLbl.setBounds(0, 110, 100, 25);
+        end_Cheat = new JToggleButton("CLICK");
+        end_Cheat.setBounds(order_Cheat.getX(), order_Cheat.getHeight() +
+                10, 60, 30);
+
+        end_Cheat.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (end_Cheat.isSelected()) {
+                    String orderTo = (String) JOptionPane.showInputDialog(
+                            null,
+                            "End Game In (n) Turns?",
+                            "Customized Dialog",
+                            JOptionPane.PLAIN_MESSAGE,
+                            null,
+                            null,
+                            "How Many Turns?");
+
+                    if (orderTo != null) {
+                        order_Cheat.setText("CLICK");
+                        order_Cheat.setSelected(false);
+                        Racko.round_cheat = true;
+                        Racko.round_limit = Integer.parseInt(orderTo);
+                    }
+                }
+            }
+        });
+
+        //add(debugLbl);
+        //add(debug_Cheat);
         add(rackLbl);
         add(rack_Cheat);
         add(orderRack);
         add(order_Cheat);
+        add(endRoundsLbl);
+        add(end_Cheat);
     }
 }
